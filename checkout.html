@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your cart — Palma</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="checkout">
+<div id="site-header"></div>
+<main>
+  <section class="wrap page-head">
+    <p class="crumbs"><a href="index.html">Home</a> / Cart</p>
+    <h1>Your cart</h1>
+  </section>
+  <div class="wrap checkout" id="checkout">
+    <div class="items">
+      <div id="lines"></div>
+    </div>
+    <form class="summary" id="order-form">
+      <h2 style="font-size:28px">Delivery details</h2>
+      <div class="field"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name"></div>
+      <div class="field"><label for="phone">Phone number</label><input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" pattern="[0-9+ ]{8,16}" placeholder="01XXXXXXXXX"></div>
+      <div class="field"><label for="city">City / Area</label><input id="city" name="city" required autocomplete="address-level2"></div>
+      <div class="field"><label for="address">Full address</label><textarea id="address" name="address" required autocomplete="street-address" placeholder="Street, building, floor, apartment"></textarea></div>
+      <div class="field"><label for="notes">Notes (optional)</label><input id="notes" name="notes"></div>
+      <div class="totals" id="totals"></div>
+      <button class="btn block" type="submit">Order on WhatsApp</button>
+      <p class="note">Payment is cash on delivery. Pressing the button opens WhatsApp with your order ready — just press Send.</p>
+    </form>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script src="assets/app.js"></script>
+</body>
+</html>

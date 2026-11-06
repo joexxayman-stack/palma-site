@@ -1,0 +1,107 @@
+# Palma store admin
+# Admin panel connected to github.com/joexxayman-stack/palma-site
+backend:
+  name: github
+  repo: joexxayman-stack/palma-site
+  branch: main
+
+media_folder: images
+public_folder: /images
+
+collections:
+  - name: store
+    label: My store
+    editor:
+      preview: false
+    files:
+      - name: products
+        label: Products
+        file: data/products.json
+        format: json
+        fields:
+          - name: products
+            label: Products
+            label_singular: Product
+            widget: list
+            summary: "{{name}} — {{price}} EGP"
+            collapsed: true
+            add_to_top: true
+            fields:
+              - { name: name, label: Product name, widget: string }
+              - name: category
+                label: Category
+                widget: select
+                default: shower
+                options:
+                  - { label: Shower gel, value: shower }
+                  - { label: Shampoo, value: shampoo }
+                  - { label: Hand wash, value: hand }
+              - { name: price, label: Price (EGP), widget: number, value_type: int, min: 0, default: 0, hint: "Leave 0 to show 'Price soon'" }
+              - { name: volume, label: Size, widget: string, required: false, hint: "e.g. 400 ml" }
+              - { name: inStock, label: In stock, widget: boolean, default: true, hint: "Turn off to show 'Sold out'" }
+              - { name: featured, label: Show in Bestsellers on the home page, widget: boolean, default: false }
+              - { name: photo, label: Main photo, widget: image, required: false, hint: "Square or portrait photo works best. If empty, a drawn bottle is shown." }
+              - name: gallery
+                label: More photos
+                widget: list
+                required: false
+                field: { name: image, label: Photo, widget: image }
+              - { name: scent, label: Scent name, widget: string, required: false, hint: "e.g. Coastal Essence" }
+              - { name: mood, label: Scent mood, widget: string, required: false, hint: "e.g. Fresh · Airy" }
+              - name: theme
+                label: Colour
+                widget: select
+                default: sage
+                hint: Background colour for this product
+                options:
+                  - { label: Sea blue, value: sea }
+                  - { label: Amber, value: amber }
+                  - { label: Sage green, value: sage }
+                  - { label: Rose, value: rose }
+                  - { label: Sand, value: sand }
+                  - { label: Lilac, value: lilac }
+              - { name: description, label: Description, widget: text, required: false }
+              - { name: howToUse, label: How to use, widget: text, required: false }
+              - { name: ingredients, label: Ingredients, widget: text, required: false }
+              - { name: notes, label: Scent notes, widget: text, required: false }
+
+      - name: settings
+        label: Store settings
+        file: data/settings.json
+        format: json
+        fields:
+          - { name: brand, label: Brand name, widget: string }
+          - { name: whatsapp, label: WhatsApp number for orders, widget: string, hint: "Digits only, starting with 20. Example: 01288856351 → 201288856351" }
+          - { name: currency, label: Currency, widget: string, default: EGP }
+          - { name: deliveryFee, label: Delivery fee, widget: number, value_type: int, min: 0, default: 0, hint: "0 = free delivery" }
+          - { name: freeDeliveryOver, label: Free delivery for orders over, widget: number, value_type: int, min: 0, default: 0, hint: "0 = no free-delivery offer" }
+          - { name: topBarText, label: Top bar message, widget: string, required: false }
+          - { name: heroEyebrow, label: Home – small line above title, widget: string, required: false }
+          - { name: heroTitle, label: Home – main title, widget: string }
+          - { name: heroText, label: Home – text under title, widget: text, required: false }
+          - { name: heroImage, label: Home – big photo (optional), widget: image, required: false, hint: "If empty, drawn bottles are shown" }
+          - name: scents
+            label: Home – scents section
+            widget: list
+            required: false
+            summary: "{{name}}"
+            fields:
+              - { name: name, label: Scent name, widget: string }
+              - { name: mood, label: Mood, widget: string, required: false }
+              - { name: text, label: Short text, widget: text, required: false }
+              - name: theme
+                label: Colour
+                widget: select
+                default: sage
+                options:
+                  - { label: Sea blue, value: sea }
+                  - { label: Amber, value: amber }
+                  - { label: Sage green, value: sage }
+                  - { label: Rose, value: rose }
+                  - { label: Sand, value: sand }
+                  - { label: Lilac, value: lilac }
+          - { name: storyTitle, label: Our story – title, widget: string, required: false }
+          - { name: storyText, label: Our story – text, widget: text, required: false }
+          - { name: instagram, label: Instagram link, widget: string, required: false }
+          - { name: tiktok, label: TikTok link, widget: string, required: false }
+          - { name: facebook, label: Facebook link, widget: string, required: false }

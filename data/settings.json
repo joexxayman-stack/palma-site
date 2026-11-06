@@ -1,0 +1,21 @@
+{
+  "brand": "Palma",
+  "whatsapp": "201288856351",
+  "currency": "EGP",
+  "deliveryFee": 0,
+  "freeDeliveryOver": 0,
+  "topBarText": "Cash on delivery · Order easily on WhatsApp",
+  "heroEyebrow": "Shower gels · Shampoos · Hand washes",
+  "heroTitle": "Everyday care, made to feel like a getaway.",
+  "heroText": "Body care in scents that take you somewhere — from a fresh coastal breeze to warm oriental notes.",
+  "heroImage": "",
+  "scents": [
+    { "name": "Coastal Essence", "mood": "Fresh · Airy", "text": "Clean and breezy, like the first walk by the sea.", "theme": "sea" },
+    { "name": "Oriental Essence", "mood": "Warm · Rich", "text": "Deep, warm and comforting — an evening ritual in a bottle.", "theme": "amber" }
+  ],
+  "storyTitle": "Named after the palm. Made for your everyday.",
+  "storyText": "Palma started with a simple idea: everyday body care should feel like a small escape. Every scent we make is built around a place or a mood.",
+  "instagram": "",
+  "tiktok": "",
+  "facebook": ""
+}

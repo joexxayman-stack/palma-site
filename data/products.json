@@ -1,0 +1,55 @@
+{
+  "products": [
+    {
+      "name": "Oriental Essence Shower Gel",
+      "category": "shower",
+      "price": 0,
+      "volume": "",
+      "inStock": true,
+      "featured": true,
+      "photo": "",
+      "gallery": [],
+      "scent": "Oriental Essence",
+      "mood": "Warm · Rich",
+      "theme": "amber",
+      "description": "A warm, comforting scent that turns your shower into an evening ritual.",
+      "howToUse": "Apply to wet skin, work into a rich lather, then rinse.",
+      "ingredients": "",
+      "notes": ""
+    },
+    {
+      "name": "Coastal Essence Hand Wash",
+      "category": "hand",
+      "price": 0,
+      "volume": "",
+      "inStock": true,
+      "featured": true,
+      "photo": "",
+      "gallery": [],
+      "scent": "Coastal Essence",
+      "mood": "Fresh · Airy",
+      "theme": "sea",
+      "description": "Clean and breezy, like the first walk by the sea.",
+      "howToUse": "Pump onto wet hands, lather for 20 seconds, then rinse.",
+      "ingredients": "",
+      "notes": ""
+    },
+    {
+      "name": "Palma Shampoo",
+      "category": "shampoo",
+      "price": 0,
+      "volume": "",
+      "inStock": true,
+      "featured": true,
+      "photo": "",
+      "gallery": [],
+      "scent": "",
+      "mood": "",
+      "theme": "sage",
+      "description": "",
+      "howToUse": "Massage into wet hair and scalp, then rinse well.",
+      "ingredients": "",
+      "notes": ""
+    }
+  ]
+}
