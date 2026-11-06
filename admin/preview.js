@@ -42,7 +42,7 @@
 
   function makePreview(kind) {
     return function PalmaPreview(props) {
-      const h = window.h || (window.React && window.React.createElement);
+      const h = window.h || (window.React && window.React.createElement) || (window.CMS && window.CMS.h);
       try { latest[kind] = readData(props, kind); } catch (err) { console.error('Preview data error', err); }
       setTimeout(() => send(kind), 0);
       return h('div', { style: { height: '100%', minHeight: '80vh', display: 'flex', flexDirection: 'column' } },
@@ -58,11 +58,23 @@
     };
   }
 
+  // Works out which file is being edited from its content.
+  function kindOf(props) {
+    const entry = props.entry;
+    const data = toPlain(entry && typeof entry.getIn === 'function' ? entry.getIn(['data']) : entry && entry.data) || {};
+    return Array.isArray(data.products) ? 'products' : 'settings';
+  }
+  const previews = { settings: makePreview('settings'), products: makePreview('products') };
+  function AutoPreview(props) { return previews[kindOf(props)](props); }
+
   function register() {
     const CMS = window.CMS;
     if (!CMS || typeof CMS.registerPreviewTemplate !== 'function') return false;
-    CMS.registerPreviewTemplate('settings', makePreview('settings'));
-    CMS.registerPreviewTemplate('products', makePreview('products'));
+    // Different versions look the preview up by file name or by collection name.
+    ['settings', 'products', 'store', 'store/settings', 'store/products'].forEach((name) => {
+      try { CMS.registerPreviewTemplate(name, AutoPreview); } catch (e) { console.warn('preview register', name, e); }
+    });
+    console.log('Palma live preview registered');
     return true;
   }
 
