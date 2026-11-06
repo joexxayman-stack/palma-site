@@ -28,16 +28,20 @@ const productUrl = (p) => `product.html?id=${encodeURIComponent(p.id)}`;
 const theme = (t) => THEMES[t] || THEMES.sage;
 const waNumber = () => String(CONFIG.whatsapp || '').replace(/\D/g, '');
 
-async function loadData() {
-  const get = (u) => fetch(u, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
-  const [settings, products] = await Promise.all([get('data/settings.json'), get('data/products.json')]);
-  CONFIG = settings || {};
+function normalizeProducts(list) {
   const seen = {};
-  PRODUCTS = (products.products || []).filter((p) => p && p.name).map((p) => {
+  return (list || []).filter((p) => p && p.name).map((p) => {
     let id = slug(p.name); seen[id] = (seen[id] || 0) + 1; if (seen[id] > 1) id += '-' + seen[id];
     const t = theme(p.theme);
     return { ...p, id, color: t.color, bg: t.bg, price: Number(p.price) || 0, inStock: p.inStock !== false, gallery: (p.gallery || []).map((g) => (typeof g === 'string' ? g : g && g.image)).filter(Boolean) };
   });
+}
+
+async function loadData() {
+  const get = (u) => fetch(u, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+  const [settings, products] = await Promise.all([get('data/settings.json'), get('data/products.json')]);
+  CONFIG = settings || {};
+  PRODUCTS = normalizeProducts(products.products);
 }
 
 function visual(p, w = 104, h = 220) {
@@ -187,12 +191,12 @@ function initShop() {
     $('#shop-title').textContent = cat === 'all' ? 'Shop all' : CATEGORIES[cat];
     document.title = `${cat === 'all' ? 'Shop all' : CATEGORIES[cat]} — ${CONFIG.brand || 'Palma'}`;
   };
-  pills.addEventListener('click', (e) => {
+  pills.onclick = (e) => {
     const b = e.target.closest('[data-cat]'); if (!b) return;
     cat = b.dataset.cat;
     history.replaceState(null, '', cat === 'all' ? 'shop.html' : `shop.html?cat=${cat}`);
     draw();
-  });
+  };
   draw();
 }
 
@@ -325,8 +329,26 @@ function initCheckout() {
   draw();
 }
 
-(async () => {
-  await loadData();
+const renderPage = () => {
   renderChrome();
   ({ home: initHome, shop: initShop, product: initProduct, checkout: initCheckout })[document.body.dataset.page]?.();
+};
+
+/* Live preview: when this page is shown inside the admin panel, it receives the
+   unsaved changes from the editor and redraws instantly. */
+const IN_PREVIEW = new URLSearchParams(location.search).has('preview') && window.parent !== window;
+if (IN_PREVIEW) {
+  window.addEventListener('message', (e) => {
+    const d = e.data;
+    if (e.origin !== location.origin || !d || d.type !== 'palma-preview') return;
+    if (d.kind === 'settings' && d.data) CONFIG = d.data;
+    if (d.kind === 'products' && d.data) PRODUCTS = normalizeProducts(d.data.products);
+    try { renderPage(); } catch (err) { console.error(err); }
+  });
+}
+
+(async () => {
+  await loadData();
+  renderPage();
+  if (IN_PREVIEW) window.parent.postMessage({ type: 'palma-preview-ready' }, location.origin);
 })();

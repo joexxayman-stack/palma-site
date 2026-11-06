@@ -11,8 +11,6 @@ public_folder: /images
 collections:
   - name: store
     label: My store
-    editor:
-      preview: false
     files:
       - name: products
         label: Products
