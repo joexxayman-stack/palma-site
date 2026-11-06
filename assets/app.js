@@ -223,7 +223,7 @@ function initProduct() {
         <div class="qty"><button id="q-minus" aria-label="Decrease quantity">−</button><span id="q" aria-live="polite">1</span><button id="q-plus" aria-label="Increase quantity">+</button></div>
         <button class="btn" id="add">Add to cart</button>
       </div>` : `<button class="btn" disabled>Sold out</button>`}
-      <div class="perks"><div>Cash on delivery</div><div>Order on WhatsApp</div><div>Pay when it arrives</div></div>
+      <div class="perks"><div>Cash on delivery</div><div>No account needed</div><div>Pay when it arrives</div></div>
       ${tabs.length ? `<div class="tabs">
         <div class="tablist" role="tablist" aria-label="Product details">${tabs.map(([id, l], i) => `<button class="tab" role="tab" aria-selected="${i === 0}" aria-controls="panel">${l}</button>`).join('')}</div>
         <p class="tabpanel" id="panel" role="tabpanel">${esc(tabs[0][2])}</p>
@@ -286,27 +286,41 @@ function initCheckout() {
     if (rm) { setQty(rm.dataset.rm, 0); draw(); }
   });
 
-  $('#order-form').addEventListener('submit', (e) => {
+  $('#order-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const f = new FormData(e.target);
+    const form = e.target, btn = form.querySelector('button[type=submit]'), err = $('#order-error');
+    const f = new FormData(form);
     const cart = getCart(); if (!cart.length) return;
-    const t = totals();
-    const lines = cart.map((l) => { const p = findProduct(l.id); return `• ${l.qty} × ${p.name}${p.price > 0 ? ' — ' + money(p.price * l.qty) : ''}`; });
-    const msg = [
-      `New order — ${CONFIG.brand || 'Palma'}`, '',
-      `Name: ${f.get('name')}`, `Phone: ${f.get('phone')}`, `City: ${f.get('city')}`, `Address: ${f.get('address')}`, '',
-      'Items:', ...lines, '',
-      `Subtotal: ${money(t.sub)}`, `Delivery: ${t.del > 0 ? money(t.del) : 'Free'}`, `Total: ${money(t.total)}`,
-      'Payment: Cash on delivery',
-      f.get('notes') ? `Notes: ${f.get('notes')}` : ''
-    ].join('\n').trim();
-    const url = `https://wa.me/${waNumber()}?text=${encodeURIComponent(msg)}`;
-    saveCart([]);
-    $('#checkout').innerHTML = `<div class="done"><h2 style="font-size:36px">Thank you, ${esc(f.get('name'))}!</h2>
-      <p class="lead">WhatsApp is opening with your order. Just press <b>Send</b> and we'll confirm it with you shortly.</p>
-      <a class="btn" href="${url}" target="_blank" rel="noopener">WhatsApp didn't open? Tap here</a>
-      <a href="shop.html">Continue shopping</a></div>`;
-    window.open(url, '_blank', 'noopener') || (location.href = url);
+    err.hidden = true; btn.disabled = true; btn.textContent = 'Placing your order…';
+    try {
+      const res = await fetch('/api/order', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          customer: { name: f.get('name'), phone: f.get('phone'), city: f.get('city'), address: f.get('address'), notes: f.get('notes') },
+          items: cart, website: f.get('website')
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'We could not place your order. Please try again.');
+      saveCart([]);
+      const s = data.summary || { items: [] };
+      const m = (n) => (n > 0 ? `${s.currency || 'EGP'} ${Number(n).toLocaleString('en-US')}` : 'Free');
+      $('.page-head h1').textContent = 'Order placed';
+      $('#checkout').innerHTML = `<div class="done" style="flex:1 1 100%">
+        <p class="eyebrow">Order ${esc(data.order)}</p>
+        <h2 style="font-size:36px">Thank you, ${esc(f.get('name'))}!</h2>
+        <p class="lead">We've received your order and will call you on <b>${esc(f.get('phone'))}</b> to confirm delivery. You pay cash when it arrives.</p>
+        <div class="totals" style="width:100%;max-width:460px;background:var(--white);border-radius:16px;padding:20px">
+          ${s.items.map((i) => `<div><span>${i.qty} × ${esc(i.name)}</span><span>${i.total > 0 ? m(i.total) : ''}</span></div>`).join('')}
+          <div><span>Delivery</span><span>${m(s.delivery)}</span></div>
+          <div class="grand"><span>Total</span><span>${s.total > 0 ? m(s.total) : '—'}</span></div>
+        </div>
+        <a class="btn" href="shop.html">Continue shopping</a></div>`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (x) {
+      err.textContent = x.message || 'Something went wrong. Please try again.';
+      err.hidden = false; btn.disabled = false; btn.textContent = 'Place order';
+    }
   });
   draw();
 }

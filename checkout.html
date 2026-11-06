@@ -30,8 +30,10 @@
       <div class="field"><label for="address">Full address</label><textarea id="address" name="address" required autocomplete="street-address" placeholder="Street, building, floor, apartment"></textarea></div>
       <div class="field"><label for="notes">Notes (optional)</label><input id="notes" name="notes"></div>
       <div class="totals" id="totals"></div>
-      <button class="btn block" type="submit">Order on WhatsApp</button>
-      <p class="note">Payment is cash on delivery. Pressing the button opens WhatsApp with your order ready — just press Send.</p>
+      <div style="position:absolute;left:-9999px" aria-hidden="true"><label for="website">Leave empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="order-error" id="order-error" role="alert" hidden></p>
+      <button class="btn block" type="submit">Place order</button>
+      <p class="note">Payment is cash on delivery. We'll call you to confirm your order.</p>
     </form>
   </div>
 </main>

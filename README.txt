@@ -59,8 +59,17 @@ STEP 4 — Log in to your admin panel
 HOW ORDERS WORK
 ---------------
 Customer adds products to the cart -> fills name, phone and address -> presses
-"Order on WhatsApp" -> WhatsApp opens with the full order written -> they press Send.
-You receive it on WhatsApp, confirm, deliver and collect cash.
+"Place order" -> sees a confirmation page with an order number.
+At the same moment the full order is sent to your WhatsApp automatically
+(by the free CallMeBot service). You call the customer, deliver, and collect cash.
+
+One-time setup for automatic WhatsApp orders:
+  1. Get your CallMeBot key: follow https://www.callmebot.com/blog/free-api-whatsapp-messages/
+     (save their bot number in your contacts and send it: I allow callmebot to send me messages)
+  2. Cloudflare -> Workers & Pages -> palmabodycare -> Settings -> Variables and Secrets
+     -> Add:  Type: Secret   Name: CALLMEBOT_APIKEY   Value: your key  -> Save
+  3. Deployments tab -> on the latest deployment press "..." -> Retry deployment.
+If you change the WhatsApp number in Store settings, get a new CallMeBot key for the new number.
 
 PHOTO TIPS
 ----------
