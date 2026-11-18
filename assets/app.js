@@ -54,38 +54,58 @@ function photoStyle(p) {
   return `object-fit:${fit};object-position:${pos};transform:scale(${zoom});transform-origin:${pos};${pad}`;
 }
 
+// Photo box colour: "site" (default) = the website's main background colour,
+// "auto" = match the photo's own background, "colour" = the product's colour.
+const boxMode = (p) => (['auto', 'colour'].includes(p.photoBackground) ? p.photoBackground : 'site');
+const boxBg = (p) => (p.photo && boxMode(p) === 'site' ? 'var(--bg)' : p.bg);
+
 function photoTag(p, src, lazy = true) {
-  const auto = p.photoBackground !== 'colour';
-  return `<img class="photo" src="${esc(src)}" alt="${esc(p.name)}" style="${photoStyle(p)}"${auto ? ' data-autobg' : ''}${lazy ? ' loading="lazy"' : ''}>`;
+  const mode = boxMode(p);
+  // In "site" mode the photo's white studio background melts into the website colour.
+  const blend = mode === 'site' ? 'mix-blend-mode:multiply;' : '';
+  return `<img class="photo" src="${esc(src)}" alt="${esc(p.name)}" style="${photoStyle(p)}${blend}"${mode === 'auto' ? ' data-autobg' : ''}${mode === 'site' ? ' data-sitebg' : ''}${lazy ? ' loading="lazy"' : ''}>`;
 }
 
 /* Makes the box around a photo the same colour as the photo's own background,
    by reading the colour at the photo's edges once it has loaded. */
-function matchPhotoBackground(img) {
+function edgeColour(img) {
+  // Average colour of the photo's outer edge, or null if the edge is busy (not a plain background).
   try {
     const c = document.createElement('canvas'); const n = 24; c.width = n; c.height = n;
     const g = c.getContext('2d', { willReadFrequently: true });
     g.drawImage(img, 0, 0, n, n);
     const px = g.getImageData(0, 0, n, n).data;
-    let r = 0, gg = 0, b = 0, k = 0;
+    const pts = [];
     for (let i = 0; i < n; i++) for (const [x, y] of [[i, 0], [i, n - 1], [0, i], [n - 1, i]]) {
-      const o = (y * n + x) * 4; if (px[o + 3] < 200) continue; r += px[o]; gg += px[o + 1]; b += px[o + 2]; k++;
+      const o = (y * n + x) * 4; if (px[o + 3] >= 200) pts.push([px[o], px[o + 1], px[o + 2]]);
     }
-    if (!k) return;
-    // Only match plain backgrounds (studio photos). Busy photo edges keep the product colour.
-    const mr = r / k, mg = gg / k, mb = b / k; let v = 0;
-    for (let i = 0; i < n; i++) for (const [x, y] of [[i, 0], [i, n - 1], [0, i], [n - 1, i]]) {
-      const o = (y * n + x) * 4; if (px[o + 3] < 200) continue;
-      v += Math.abs(px[o] - mr) + Math.abs(px[o + 1] - mg) + Math.abs(px[o + 2] - mb);
-    }
-    if (v / k > 36) return;
-    const box = img.closest('.media, .pdp-media, .thumb, .hero-art');
-    if (box) box.style.background = `rgb(${Math.round(r / k)}, ${Math.round(gg / k)}, ${Math.round(b / k)})`;
-  } catch (e) { /* photo from another site: keep the product colour */ }
+    if (!pts.length) return null;
+    const m = [0, 1, 2].map((j) => pts.reduce((a, q) => a + q[j], 0) / pts.length);
+    const v = pts.reduce((a, q) => a + Math.abs(q[0] - m[0]) + Math.abs(q[1] - m[1]) + Math.abs(q[2] - m[2]), 0) / pts.length;
+    return v > 36 ? null : m;
+  } catch (e) { return null; } // photo from another site
 }
+
+function matchPhotoBackground(img) {
+  const m = edgeColour(img); if (!m) return;
+  const box = img.closest('.media, .pdp-media, .thumb, .hero-art');
+  if (box) box.style.background = `rgb(${m.map(Math.round).join(', ')})`;
+}
+
+// Website-colour mode: brighten a light studio background to pure white, so that
+// (with multiply blending) it becomes exactly the website's main colour.
+function blendIntoSite(img) {
+  const m = edgeColour(img); if (!m) return;
+  const low = Math.min(...m);
+  if (low < 170) return; // dark background: leave the photo as it is
+  img.style.filter = `brightness(${Math.min(1.4, 255 / low).toFixed(3)})`;
+}
+
 document.addEventListener('load', (e) => {
   const img = e.target;
-  if (img.tagName === 'IMG' && img.hasAttribute('data-autobg')) matchPhotoBackground(img);
+  if (img.tagName !== 'IMG') return;
+  if (img.hasAttribute('data-autobg')) matchPhotoBackground(img);
+  if (img.hasAttribute('data-sitebg')) blendIntoSite(img);
 }, true);
 
 function visual(p, w = 104, h = 220) {
@@ -95,7 +115,7 @@ function visual(p, w = 104, h = 220) {
 
 function card(p) {
   return `<article class="card">
-    <a class="media" href="${productUrl(p)}" style="background:${p.bg}" aria-label="${esc(p.name)}">${visual(p)}</a>
+    <a class="media" href="${productUrl(p)}" style="background:${boxBg(p)}" aria-label="${esc(p.name)}">${visual(p)}</a>
     <div class="info">
       <div><p class="type">${TYPE_LABEL[p.category] || ''}</p><h3><a href="${productUrl(p)}">${esc(p.name)}</a></h3>${p.volume ? `<p class="size">${esc(p.volume)}</p>` : ''}</div>
       <p class="price">${money(p.price)}</p>
@@ -292,7 +312,7 @@ function initProduct() {
   const photos = [p.photo, ...p.gallery].filter(Boolean);
   $('#pdp').innerHTML = `
     <div style="flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:12px">
-      <div class="pdp-media" id="main-media" style="background:${p.bg}">${visual(p, 160, 380)}</div>
+      <div class="pdp-media" id="main-media" style="background:${boxBg(p)}">${visual(p, 160, 380)}</div>
       ${photos.length > 1 ? `<div class="thumbs">${photos.map((src, i) => `<button class="thumb-btn" data-src="${esc(src)}" aria-label="Photo ${i + 1}" aria-pressed="${i === 0}"><img src="${esc(src)}" alt=""></button>`).join('')}</div>` : ''}
     </div>
     <div class="pdp-info">
@@ -350,7 +370,7 @@ function initCheckout() {
     $('#lines').innerHTML = cart.map((l) => {
       const p = findProduct(l.id);
       return `<div class="line">
-        <a class="thumb" href="${productUrl(p)}" style="background:${p.bg}" aria-label="${esc(p.name)}">${visual(p, 40, 64)}</a>
+        <a class="thumb" href="${productUrl(p)}" style="background:${boxBg(p)}" aria-label="${esc(p.name)}">${visual(p, 40, 64)}</a>
         <div class="meta"><b>${esc(p.name)}</b><small>${money(p.price)}${p.volume ? ' · ' + esc(p.volume) : ''}</small></div>
         <div class="end">
           <div class="qty"><button data-q="${p.id}" data-d="-1" aria-label="Decrease ${esc(p.name)}">−</button><span>${l.qty}</span><button data-q="${p.id}" data-d="1" aria-label="Increase ${esc(p.name)}">+</button></div>
