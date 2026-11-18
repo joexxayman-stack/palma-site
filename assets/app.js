@@ -238,6 +238,10 @@ function initHome() {
   if (CONFIG.heroImage) {
     const pos = { center: 'center', top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[CONFIG.heroImagePosition] || 'center';
     art.innerHTML = `<img class="photo" src="${esc(CONFIG.heroImage)}" alt="" style="object-position:${pos}">`;
+    // On phones the box takes the photo's own shape, so the whole photo shows.
+    const img = art.querySelector('img');
+    const setRatio = () => img.naturalWidth && art.style.setProperty('--ratio', `${img.naturalWidth} / ${img.naturalHeight}`);
+    img.complete ? setRatio() : img.addEventListener('load', setRatio);
   } else {
     art.innerHTML = PRODUCTS.slice(0, 3).map((p, i) => visual({ ...p, photo: '' }, i === 1 ? 128 : 112, [240, 310, 270][i])).join('');
   }

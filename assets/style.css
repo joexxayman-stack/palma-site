@@ -200,3 +200,35 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-1px;margin:0}
 .pdp-price .save{margin-left:8px;color:#1E120A;font-size:13px;font-weight:700}
 .includes{background:var(--white);border-radius:16px;padding:18px 20px}
 .includes ul{margin:10px 0 0;padding-left:20px;line-height:1.9;font-size:16px;color:var(--body)}
+
+/* ---------- Phones: photos keep their real shape, products two per row ---------- */
+@media (max-width:700px){
+  .wrap{padding-left:16px;padding-right:16px}
+  /* home photo: show the whole photo at its own shape, nothing cut off */
+  .hero{gap:28px;padding-bottom:56px}
+  .hero-art.has-photo{min-height:0;height:auto;aspect-ratio:var(--ratio,4/3);border-radius:20px}
+  .hero-art.has-photo .photo{object-fit:cover;object-position:center}
+  /* product grids: two per row, portrait photo boxes like a phone shop */
+  #shop-grid,#bestsellers,#related{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}
+  .card{gap:10px}
+  .card .media{height:auto;aspect-ratio:3/4;border-radius:16px}
+  .card .media .bottle{zoom:.7}
+  .card .info{flex-direction:column;gap:4px}
+  .card h3{font-size:15px;line-height:1.3}
+  .card .type{font-size:11px}
+  .card .size{font-size:13px}
+  .card .price{font-size:15px}
+  .card .price .was{display:block;margin:2px 0 0}
+  .card .btn{min-height:44px;font-size:14px;padding:0 12px}
+  .card .media .save{top:8px;left:8px;font-size:11px;padding:4px 8px}
+  /* product page: photo box matches portrait product photos */
+  .pdp{gap:28px}
+  .pdp-media{min-height:0;aspect-ratio:3/4;border-radius:20px}
+  .thumbs{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+  /* category + scent buttons: one row you can swipe sideways */
+  .filters{flex-direction:column;align-items:flex-start;gap:8px;padding-bottom:16px}
+  .filters .pills,.scent-row .pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;max-width:calc(100% + 16px);-webkit-overflow-scrolling:touch}
+  .filters .pills::-webkit-scrollbar,.scent-row .pills::-webkit-scrollbar{display:none}
+  .pill{flex:0 0 auto;white-space:nowrap}
+  .cat-card{min-height:260px;padding:24px}
+}
