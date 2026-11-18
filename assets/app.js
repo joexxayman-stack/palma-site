@@ -45,8 +45,21 @@ async function loadData() {
   PRODUCTS = normalizeProducts(products.products);
 }
 
+// How a product photo sits in its box, from the product's "Photo display" settings.
+function photoStyle(p) {
+  const fit = p.photoFit === 'whole' ? 'contain' : 'cover';
+  const pos = { center: 'center', top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[p.photoPosition] || 'center';
+  const zoom = Math.min(200, Math.max(50, Number(p.photoZoom) || 100)) / 100;
+  const pad = fit === 'contain' ? 'padding:6%;box-sizing:border-box;' : '';
+  return `object-fit:${fit};object-position:${pos};transform:scale(${zoom});transform-origin:${pos};${pad}`;
+}
+
+function photoTag(p, src, lazy = true) {
+  return `<img class="photo" src="${esc(src)}" alt="${esc(p.name)}" style="${photoStyle(p)}"${lazy ? ' loading="lazy"' : ''}>`;
+}
+
 function visual(p, w = 104, h = 220) {
-  if (p.photo) return `<img class="photo" src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy">`;
+  if (p.photo) return photoTag(p, p.photo);
   return `<div class="bottle" style="--c:${p.color};--w:${w}px;--h:${h}px" aria-hidden="true"><span class="cap"></span><span class="body"><span class="label"><b>${esc((CONFIG.brand || 'palma').toLowerCase())}</b>${w >= 100 && p.scent ? esc(p.scent) : ''}</span></span></div>`;
 }
 
@@ -283,7 +296,7 @@ function initProduct() {
   }));
   document.querySelectorAll('.thumb-btn').forEach((b) => b.addEventListener('click', () => {
     document.querySelectorAll('.thumb-btn').forEach((x) => x.setAttribute('aria-pressed', x === b));
-    $('#main-media').innerHTML = `<img class="photo" src="${b.dataset.src}" alt="${esc(p.name)}">`;
+    $('#main-media').innerHTML = photoTag(p, b.dataset.src, false);
   }));
   const related = PRODUCTS.filter((x) => x.id !== p.id);
   if (!related.length) $('#related-wrap').hidden = true;

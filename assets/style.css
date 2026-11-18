@@ -190,3 +190,5 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-1px;margin:0}
 :focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 
 @media (max-width:560px){.hero-art{min-height:340px;padding-bottom:40px}.hero-art .bottle{zoom:.62}.pdp-media{min-height:420px}.pdp-media .bottle{zoom:.75}}
+
+.card .media,.pdp-media,.line .thumb{overflow:hidden}

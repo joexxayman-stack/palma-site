@@ -39,6 +39,28 @@ collections:
               - { name: inStock, label: In stock, widget: boolean, default: true, hint: "Turn off to show 'Sold out'" }
               - { name: featured, label: Show in Bestsellers on the home page, widget: boolean, default: false }
               - { name: photo, label: Main photo, widget: image, required: false, hint: "Square or portrait photo works best. If empty, a drawn bottle is shown." }
+              - name: photoFit
+                label: Photo display
+                widget: select
+                default: fill
+                required: false
+                hint: "Fill box = photo fills the whole box (edges may be cut). Show whole photo = nothing is cut off."
+                options:
+                  - { label: Fill box (may crop), value: fill }
+                  - { label: Show whole photo (no crop), value: whole }
+              - name: photoPosition
+                label: Photo focus
+                widget: select
+                default: center
+                required: false
+                hint: "Which part of the photo to keep in view when it is cropped"
+                options:
+                  - { label: Center, value: center }
+                  - { label: Top, value: top }
+                  - { label: Bottom, value: bottom }
+                  - { label: Left, value: left }
+                  - { label: Right, value: right }
+              - { name: photoZoom, label: Photo zoom (%), widget: number, value_type: int, min: 50, max: 200, step: 5, default: 100, required: false, hint: "100 = normal. Lower to zoom out, higher to zoom in." }
               - name: gallery
                 label: More photos
                 widget: list
