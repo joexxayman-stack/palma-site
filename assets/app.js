@@ -55,8 +55,38 @@ function photoStyle(p) {
 }
 
 function photoTag(p, src, lazy = true) {
-  return `<img class="photo" src="${esc(src)}" alt="${esc(p.name)}" style="${photoStyle(p)}"${lazy ? ' loading="lazy"' : ''}>`;
+  const auto = p.photoBackground !== 'colour';
+  return `<img class="photo" src="${esc(src)}" alt="${esc(p.name)}" style="${photoStyle(p)}"${auto ? ' data-autobg' : ''}${lazy ? ' loading="lazy"' : ''}>`;
 }
+
+/* Makes the box around a photo the same colour as the photo's own background,
+   by reading the colour at the photo's edges once it has loaded. */
+function matchPhotoBackground(img) {
+  try {
+    const c = document.createElement('canvas'); const n = 24; c.width = n; c.height = n;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0, n, n);
+    const px = g.getImageData(0, 0, n, n).data;
+    let r = 0, gg = 0, b = 0, k = 0;
+    for (let i = 0; i < n; i++) for (const [x, y] of [[i, 0], [i, n - 1], [0, i], [n - 1, i]]) {
+      const o = (y * n + x) * 4; if (px[o + 3] < 200) continue; r += px[o]; gg += px[o + 1]; b += px[o + 2]; k++;
+    }
+    if (!k) return;
+    // Only match plain backgrounds (studio photos). Busy photo edges keep the product colour.
+    const mr = r / k, mg = gg / k, mb = b / k; let v = 0;
+    for (let i = 0; i < n; i++) for (const [x, y] of [[i, 0], [i, n - 1], [0, i], [n - 1, i]]) {
+      const o = (y * n + x) * 4; if (px[o + 3] < 200) continue;
+      v += Math.abs(px[o] - mr) + Math.abs(px[o + 1] - mg) + Math.abs(px[o + 2] - mb);
+    }
+    if (v / k > 36) return;
+    const box = img.closest('.media, .pdp-media, .thumb, .hero-art');
+    if (box) box.style.background = `rgb(${Math.round(r / k)}, ${Math.round(gg / k)}, ${Math.round(b / k)})`;
+  } catch (e) { /* photo from another site: keep the product colour */ }
+}
+document.addEventListener('load', (e) => {
+  const img = e.target;
+  if (img.tagName === 'IMG' && img.hasAttribute('data-autobg')) matchPhotoBackground(img);
+}, true);
 
 function visual(p, w = 104, h = 220) {
   if (p.photo) return photoTag(p, p.photo);

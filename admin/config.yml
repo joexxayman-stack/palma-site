@@ -60,6 +60,15 @@ collections:
                   - { label: Bottom, value: bottom }
                   - { label: Left, value: left }
                   - { label: Right, value: right }
+              - name: photoBackground
+                label: Photo box colour
+                widget: select
+                default: auto
+                required: false
+                hint: "Match photo = the box takes your photo's background colour so it blends in."
+                options:
+                  - { label: Match photo (recommended), value: auto }
+                  - { label: Use product colour, value: colour }
               - { name: photoZoom, label: Photo zoom (%), widget: number, value_type: int, min: 50, max: 200, step: 5, default: 100, required: false, hint: "100 = normal. Lower to zoom out, higher to zoom in." }
               - name: gallery
                 label: More photos
