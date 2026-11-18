@@ -5,7 +5,7 @@
    (they are saved in data/products.json and data/settings.json).
    ========================================================= */
 
-const ALL_CATEGORIES = { shower: 'Shower gels', shampoo: 'Shampoos', hand: 'Hand washes' };
+const ALL_CATEGORIES = { shower: 'Shower gels', hand: 'Hand washes', bundle: 'Bundles', shampoo: 'Shampoos' };
 // Categories shown on the site (chosen in Store settings → "Categories on the website").
 let CATEGORIES = { ...ALL_CATEGORIES };
 function applyCategories() {
@@ -17,7 +17,7 @@ const categoryList = () => {
   const t = n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0] || '';
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
-const TYPE_LABEL = { shower: 'Shower gel', shampoo: 'Shampoo', hand: 'Hand wash' };
+const TYPE_LABEL = { shower: 'Shower gel', shampoo: 'Shampoo', hand: 'Hand wash', bundle: 'Bundle' };
 const THEMES = {
   sea:   { color: '#8DB7C7', bg: '#E3ECEE' },
   amber: { color: '#C98A52', bg: '#F1E7DC' },
@@ -45,7 +45,7 @@ function normalizeProducts(list) {
   return (list || []).filter((p) => p && p.name && CATEGORIES[p.category]).map((p) => {
     let id = slug(p.name); seen[id] = (seen[id] || 0) + 1; if (seen[id] > 1) id += '-' + seen[id];
     const t = theme(p.theme);
-    return { ...p, id, color: t.color, bg: t.bg, price: Number(p.price) || 0, inStock: p.inStock !== false, gallery: (p.gallery || []).map((g) => (typeof g === 'string' ? g : g && g.image)).filter(Boolean) };
+    return { ...p, id, color: t.color, bg: t.bg, price: Number(p.price) || 0, compareAt: Number(p.compareAtPrice) || 0, includes: (p.includes || []).map((x) => (typeof x === 'string' ? x : x && x.item)).filter(Boolean), inStock: p.inStock !== false, gallery: (p.gallery || []).map((g) => (typeof g === 'string' ? g : g && g.image)).filter(Boolean) };
   });
 }
 
@@ -126,12 +126,21 @@ function visual(p, w = 104, h = 220) {
   return `<div class="bottle" style="--c:${p.color};--w:${w}px;--h:${h}px" aria-hidden="true"><span class="cap"></span><span class="body"><span class="label"><b>${esc((CONFIG.brand || 'palma').toLowerCase())}</b>${w >= 100 && p.scent ? esc(p.scent) : ''}</span></span></div>`;
 }
 
+// Price with the original price struck through when a lower bundle/sale price is set.
+function priceHtml(p) {
+  if (p.compareAt > p.price && p.price > 0) {
+    return `${money(p.price)} <s class="was">${money(p.compareAt)}</s>`;
+  }
+  return money(p.price);
+}
+const saveBadge = (p) => (p.compareAt > p.price && p.price > 0 ? `<span class="save">Save ${money(p.compareAt - p.price)}</span>` : '');
+
 function card(p) {
   return `<article class="card">
-    <a class="media" href="${productUrl(p)}" style="background:${boxBg(p)}" aria-label="${esc(p.name)}">${visual(p)}</a>
+    <a class="media" href="${productUrl(p)}" style="background:${boxBg(p)}" aria-label="${esc(p.name)}">${visual(p)}${saveBadge(p)}</a>
     <div class="info">
-      <div><p class="type">${TYPE_LABEL[p.category] || ''}</p><h3><a href="${productUrl(p)}">${esc(p.name)}</a></h3>${p.volume ? `<p class="size">${esc(p.volume)}</p>` : ''}</div>
-      <p class="price">${money(p.price)}</p>
+      <div><p class="type">${TYPE_LABEL[p.category] || ''}</p><h3><a href="${productUrl(p)}">${esc(p.name)}</a></h3>${p.includes.length ? `<p class="size">Includes ${p.includes.length} item${p.includes.length === 1 ? '' : 's'}</p>` : p.volume ? `<p class="size">${esc(p.volume)}</p>` : ''}</div>
+      <p class="price">${priceHtml(p)}</p>
     </div>
     ${p.inStock ? `<button class="btn ghost" data-add="${p.id}">Add to cart</button>` : `<button class="btn ghost" disabled>Sold out</button>`}
   </article>`;
@@ -332,7 +341,8 @@ function initProduct() {
         <p class="eyebrow">${TYPE_LABEL[p.category] || ''}${p.mood ? ' · ' + esc(p.mood) : ''}</p>
         <h1>${esc(p.name)}</h1>
       </div>
-      <p class="pdp-price">${money(p.price)} ${p.volume ? `<span>· ${esc(p.volume)}</span>` : ''}</p>
+      <p class="pdp-price">${priceHtml(p)} ${p.volume ? `<span>· ${esc(p.volume)}</span>` : ''} ${saveBadge(p)}</p>
+      ${p.includes.length ? `<div class="includes"><p class="eyebrow">What's inside</p><ul>${p.includes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
       ${p.description ? `<p class="lead" style="white-space:pre-line">${esc(p.description)}</p>` : ''}
       ${p.inStock ? `<div class="buy">
         <div class="qty"><button id="q-minus" aria-label="Decrease quantity">−</button><span id="q" aria-live="polite">1</span><button id="q-plus" aria-label="Increase quantity">+</button></div>

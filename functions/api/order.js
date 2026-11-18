@@ -81,7 +81,7 @@ export async function onRequestPost({ request, env }) {
     customer.notes ? `Notes: ${customer.notes}` : null,
     '',
     'Items:',
-    ...lines.map((l) => `• ${l.qty} × ${l.p.name}${l.p.volume ? ' (' + l.p.volume + ')' : ''} — ${money(l.p.price * l.qty)}`),
+    ...lines.map((l) => `• ${l.qty} × ${l.p.name}${l.p.volume ? ' (' + l.p.volume + ')' : ''} — ${money(l.p.price * l.qty)}` + (Array.isArray(l.p.includes) && l.p.includes.length ? '\n   includes: ' + l.p.includes.map((x) => (typeof x === 'string' ? x : x && x.item)).filter(Boolean).join(', ') : '')),
     '',
     `Subtotal: ${money(sub)}`,
     `Delivery: ${delivery > 0 ? money(delivery) : 'Free'}`,

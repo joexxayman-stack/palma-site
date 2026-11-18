@@ -32,9 +32,17 @@ collections:
                 default: shower
                 options:
                   - { label: Shower gel, value: shower }
-                  - { label: Shampoo, value: shampoo }
                   - { label: Hand wash, value: hand }
+                  - { label: Bundle, value: bundle }
+                  - { label: Shampoo, value: shampoo }
               - { name: price, label: Price (EGP), widget: number, value_type: int, min: 0, default: 0, hint: "Leave 0 to show 'Price soon'" }
+              - { name: compareAtPrice, label: Original price (EGP), widget: number, value_type: int, min: 0, required: false, hint: "Optional. If higher than the price, it is shown crossed out with a 'Save' badge — great for bundles and offers." }
+              - name: includes
+                label: What's inside (for bundles)
+                widget: list
+                required: false
+                hint: "One line per item, e.g. Jasmine & Neroli Bloom Shower Gel 1L"
+                field: { name: item, label: Item, widget: string }
               - { name: volume, label: Size, widget: string, required: false, hint: "e.g. 400 ml" }
               - { name: inStock, label: In stock, widget: boolean, default: true, hint: "Turn off to show 'Sold out'" }
               - { name: featured, label: Show in Bestsellers on the home page, widget: boolean, default: false }
@@ -107,12 +115,13 @@ collections:
             widget: select
             multiple: true
             required: false
-            default: [shower, shampoo, hand]
+            default: [shower, hand, bundle]
             hint: "Untick a category to hide it (and its products) from the site. Tick it again to bring it back."
             options:
               - { label: Shower gels, value: shower }
-              - { label: Shampoos, value: shampoo }
               - { label: Hand washes, value: hand }
+              - { label: Bundles, value: bundle }
+              - { label: Shampoos, value: shampoo }
           - { name: currency, label: Currency, widget: string, default: EGP }
           - { name: deliveryFee, label: Delivery fee, widget: number, value_type: int, min: 0, default: 0, hint: "0 = free delivery" }
           - { name: freeDeliveryOver, label: Free delivery for orders over, widget: number, value_type: int, min: 0, default: 0, hint: "0 = no free-delivery offer" }
