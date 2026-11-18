@@ -98,17 +98,17 @@ function toast(msg, withLink) {
 function renderChrome() {
   const page = document.body.dataset.page;
   const brand = esc((CONFIG.brand || 'Palma').toLowerCase());
-  const cur = (p) => (page === p ? ' aria-current="page"' : '');
+  const urlCat = new URLSearchParams(location.search).get('cat') || Object.keys(CATEGORIES)[0];
+  const curCat = (c) => (page === 'shop' && urlCat === c ? ' aria-current="page"' : '');
   const top = Number(CONFIG.freeDeliveryOver) > 0 ? `Free delivery on orders over ${money(CONFIG.freeDeliveryOver)}` : (CONFIG.topBarText || '');
   $('#site-header').innerHTML = `
   ${top ? `<div class="topbar">${esc(top)}</div>` : ''}
   <div class="site-header"><div class="wrap">
     <a class="logo" href="index.html">${brand}</a>
     <nav class="nav" id="nav" aria-label="Main">
-      <a href="shop.html"${cur('shop')}>Shop all</a>
-      <a href="shop.html?cat=shower">Shower gels</a>
-      <a href="shop.html?cat=shampoo">Shampoos</a>
-      <a href="shop.html?cat=hand">Hand washes</a>
+      <a href="shop.html?cat=shower"${curCat('shower')}>Shower gels</a>
+      <a href="shop.html?cat=shampoo"${curCat('shampoo')}>Shampoos</a>
+      <a href="shop.html?cat=hand"${curCat('hand')}>Hand washes</a>
       <a href="index.html#story">Our story</a>
     </nav>
     <div class="header-actions">
@@ -182,7 +182,7 @@ function initHome() {
 
 function initShop() {
   const params = new URLSearchParams(location.search);
-  let cat = CATEGORIES[params.get('cat')] ? params.get('cat') : 'all';
+  let cat = CATEGORIES[params.get('cat')] ? params.get('cat') : Object.keys(CATEGORIES)[0];
   let scent = params.get('scent') || 'all';
   const pills = $('#pills'), row = $('#scent-row');
 
@@ -205,7 +205,7 @@ function initShop() {
   };
 
   const draw = () => {
-    pills.innerHTML = [['all', 'All'], ...Object.entries(CATEGORIES)].map(([id, l]) => `<button class="pill" data-cat="${id}" aria-pressed="${id === cat}">${l}</button>`).join('');
+    pills.innerHTML = Object.entries(CATEGORIES).map(([id, l]) => `<button class="pill" data-cat="${id}" aria-pressed="${id === cat}">${l}</button>`).join('');
 
     const scents = cat === 'all' ? [] : scentsIn(cat);
     if (!scents.some((x) => x.id === scent)) scent = 'all';
