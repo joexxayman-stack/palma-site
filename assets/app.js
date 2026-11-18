@@ -234,9 +234,10 @@ function initHome() {
   $('#wa-band').href = `https://wa.me/${waNumber()}`;
 
   const art = $('#hero-art');
+  art.classList.toggle('has-photo', !!CONFIG.heroImage);
   if (CONFIG.heroImage) {
-    art.classList.add('has-photo');
-    art.innerHTML = `<img class="photo" src="${esc(CONFIG.heroImage)}" alt="">`;
+    const pos = { center: 'center', top: 'center top', bottom: 'center bottom', left: 'left center', right: 'right center' }[CONFIG.heroImagePosition] || 'center';
+    art.innerHTML = `<img class="photo" src="${esc(CONFIG.heroImage)}" alt="" style="object-position:${pos}">`;
   } else {
     art.innerHTML = PRODUCTS.slice(0, 3).map((p, i) => visual({ ...p, photo: '' }, i === 1 ? 128 : 112, [240, 310, 270][i])).join('');
   }

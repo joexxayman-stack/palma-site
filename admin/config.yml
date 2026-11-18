@@ -130,6 +130,18 @@ collections:
           - { name: heroTitle, label: Home – main title, widget: string }
           - { name: heroText, label: Home – text under title, widget: text, required: false }
           - { name: heroImage, label: Home – big photo (optional), widget: image, required: false, hint: "If empty, drawn bottles are shown" }
+          - name: heroImagePosition
+            label: Home – big photo focus
+            widget: select
+            default: center
+            required: false
+            hint: "The photo fills the whole box. Choose which part of it stays in view."
+            options:
+              - { label: Center, value: center }
+              - { label: Top, value: top }
+              - { label: Bottom, value: bottom }
+              - { label: Left, value: left }
+              - { label: Right, value: right }
           - name: scents
             label: Home – scents section
             widget: list
