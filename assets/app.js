@@ -5,7 +5,18 @@
    (they are saved in data/products.json and data/settings.json).
    ========================================================= */
 
-const CATEGORIES = { shower: 'Shower gels', shampoo: 'Shampoos', hand: 'Hand washes' };
+const ALL_CATEGORIES = { shower: 'Shower gels', shampoo: 'Shampoos', hand: 'Hand washes' };
+// Categories shown on the site (chosen in Store settings → "Categories on the website").
+let CATEGORIES = { ...ALL_CATEGORIES };
+function applyCategories() {
+  const on = Array.isArray(CONFIG.categories) && CONFIG.categories.length ? CONFIG.categories : Object.keys(ALL_CATEGORIES);
+  CATEGORIES = Object.fromEntries(Object.entries(ALL_CATEGORIES).filter(([id]) => on.includes(id)));
+}
+const categoryList = () => {
+  const n = Object.values(CATEGORIES).map((x) => x.toLowerCase());
+  const t = n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0] || '';
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
 const TYPE_LABEL = { shower: 'Shower gel', shampoo: 'Shampoo', hand: 'Hand wash' };
 const THEMES = {
   sea:   { color: '#8DB7C7', bg: '#E3ECEE' },
@@ -31,7 +42,7 @@ const waNumber = () => String(CONFIG.whatsapp || '').replace(/\D/g, '');
 
 function normalizeProducts(list) {
   const seen = {};
-  return (list || []).filter((p) => p && p.name).map((p) => {
+  return (list || []).filter((p) => p && p.name && CATEGORIES[p.category]).map((p) => {
     let id = slug(p.name); seen[id] = (seen[id] || 0) + 1; if (seen[id] > 1) id += '-' + seen[id];
     const t = theme(p.theme);
     return { ...p, id, color: t.color, bg: t.bg, price: Number(p.price) || 0, inStock: p.inStock !== false, gallery: (p.gallery || []).map((g) => (typeof g === 'string' ? g : g && g.image)).filter(Boolean) };
@@ -42,6 +53,8 @@ async function loadData() {
   const get = (u) => fetch(u, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
   const [settings, products] = await Promise.all([get('data/settings.json'), get('data/products.json')]);
   CONFIG = settings || {};
+  applyCategories();
+  loadData.lastProducts = products.products;
   PRODUCTS = normalizeProducts(products.products);
 }
 
@@ -169,9 +182,7 @@ function renderChrome() {
   <div class="site-header"><div class="wrap">
     <a class="logo" href="index.html">${brand}</a>
     <nav class="nav" id="nav" aria-label="Main">
-      <a href="shop.html?cat=shower"${curCat('shower')}>Shower gels</a>
-      <a href="shop.html?cat=shampoo"${curCat('shampoo')}>Shampoos</a>
-      <a href="shop.html?cat=hand"${curCat('hand')}>Hand washes</a>
+      ${Object.entries(CATEGORIES).map(([id, l]) => `<a href="shop.html?cat=${id}"${curCat(id)}>${l}</a>`).join('')}
       <a href="index.html#story">Our story</a>
     </nav>
     <div class="header-actions">
@@ -187,8 +198,8 @@ function renderChrome() {
   const social = [['Instagram', CONFIG.instagram], ['TikTok', CONFIG.tiktok], ['Facebook', CONFIG.facebook]].filter(([, u]) => u);
   $('#site-footer').innerHTML = `<footer class="site-footer"><div class="wrap">
     <div class="cols">
-      <div><p class="logo">${brand}</p><p style="color:var(--muted);line-height:1.6">Shower gels, shampoos and hand washes.</p></div>
-      <div><p class="h">Shop</p><a href="shop.html?cat=shower">Shower gels</a><a href="shop.html?cat=shampoo">Shampoos</a><a href="shop.html?cat=hand">Hand washes</a></div>
+      <div><p class="logo">${brand}</p><p style="color:var(--muted);line-height:1.6">${esc(categoryList())}.</p></div>
+      <div><p class="h">Shop</p>${Object.entries(CATEGORIES).map(([id, l]) => `<a href="shop.html?cat=${id}">${l}</a>`).join('')}</div>
       <div><p class="h">Help</p><a href="https://wa.me/${waNumber()}" target="_blank" rel="noopener">WhatsApp us</a><a href="checkout.html">Your cart</a><span style="color:var(--muted)">Cash on delivery</span></div>
       ${social.length ? `<div><p class="h">Follow</p>${social.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${l}</a>`).join('')}</div>` : ''}
     </div>
@@ -244,6 +255,7 @@ function initHome() {
 }
 
 function initShop() {
+  const lead = $('#shop-lead'); if (lead) lead.textContent = `${categoryList()} in every ${CONFIG.brand || 'Palma'} scent.`;
   const params = new URLSearchParams(location.search);
   let cat = CATEGORIES[params.get('cat')] ? params.get('cat') : Object.keys(CATEGORIES)[0];
   let scent = params.get('scent') || 'all';
@@ -439,8 +451,8 @@ if (IN_PREVIEW) {
   window.addEventListener('message', (e) => {
     const d = e.data;
     if (e.origin !== location.origin || !d || d.type !== 'palma-preview') return;
-    if (d.kind === 'settings' && d.data) CONFIG = d.data;
-    if (d.kind === 'products' && d.data) PRODUCTS = normalizeProducts(d.data.products);
+    if (d.kind === 'settings' && d.data) { CONFIG = d.data; applyCategories(); loadData.lastProducts && (PRODUCTS = normalizeProducts(loadData.lastProducts)); }
+    if (d.kind === 'products' && d.data) { loadData.lastProducts = d.data.products; PRODUCTS = normalizeProducts(d.data.products); }
     try { renderPage(); } catch (err) { console.error(err); }
   });
 }

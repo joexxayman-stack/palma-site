@@ -102,6 +102,17 @@ collections:
         fields:
           - { name: brand, label: Brand name, widget: string }
           - { name: whatsapp, label: WhatsApp number for orders, widget: string, hint: "Digits only, starting with 20. Example: 01288856351 → 201288856351" }
+          - name: categories
+            label: Categories on the website
+            widget: select
+            multiple: true
+            required: false
+            default: [shower, shampoo, hand]
+            hint: "Untick a category to hide it (and its products) from the site. Tick it again to bring it back."
+            options:
+              - { label: Shower gels, value: shower }
+              - { label: Shampoos, value: shampoo }
+              - { label: Hand washes, value: hand }
           - { name: currency, label: Currency, widget: string, default: EGP }
           - { name: deliveryFee, label: Delivery fee, widget: number, value_type: int, min: 0, default: 0, hint: "0 = free delivery" }
           - { name: freeDeliveryOver, label: Free delivery for orders over, widget: number, value_type: int, min: 0, default: 0, hint: "0 = no free-delivery offer" }
