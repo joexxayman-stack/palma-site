@@ -251,18 +251,6 @@ function initHome() {
     return `<a class="cat-card" href="shop.html?cat=${id}" style="background:${p.bg}"><div class="art">${visual({ ...p, photo: '' }, 96, 190)}</div><div class="row"><span>${label}</span><span>Shop →</span></div></a>`;
   }).join('');
 
-  const scents = (CONFIG.scents || []).filter((s) => s && s.name);
-  if (!scents.length) $('#scents').hidden = true;
-  $('#scent-grid').innerHTML = scents.map((s) => {
-    const t = theme(s.theme);
-    const p = PRODUCTS.find((x) => (x.scent || '').toLowerCase() === s.name.toLowerCase());
-    return `<div class="scent" style="background:${t.color}">
-      ${s.mood ? `<p class="eyebrow">${esc(s.mood)}</p>` : ''}
-      <h3>${esc(s.name)}</h3>
-      ${s.text ? `<p>${esc(s.text)}</p>` : ''}
-      <a class="btn" href="${p ? productUrl(p) : 'shop.html'}">Shop ${esc(s.name)}</a>
-    </div>`;
-  }).join('');
 
   const featured = PRODUCTS.filter((p) => p.featured);
   $('#bestsellers').innerHTML = (featured.length ? featured : PRODUCTS).slice(0, 8).map(card).join('');
