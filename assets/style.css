@@ -123,6 +123,11 @@ h1,h2,h3{font-family:var(--display);letter-spacing:-1px;margin:0}
 .pills{display:flex;flex-wrap:wrap;gap:10px}
 .pill{min-height:44px;padding:0 20px;border-radius:999px;font:600 15px var(--text);cursor:pointer;background:transparent;color:var(--ink);border:1.5px solid var(--field)}
 .pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.scent-row{padding-bottom:24px;display:flex;flex-direction:column;gap:10px}
+.scent-row[hidden]{display:none}
+.scent-label{margin:0;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.scent-pill{display:inline-flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:999px;border:1px solid rgba(0,0,0,.15)}
 .count{margin:0;font-size:15px;color:var(--muted)}
 
 /* product page */

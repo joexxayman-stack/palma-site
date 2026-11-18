@@ -44,7 +44,7 @@ collections:
                 widget: list
                 required: false
                 field: { name: image, label: Photo, widget: image }
-              - { name: scent, label: Scent name, widget: string, required: false, hint: "e.g. Coastal Essence" }
+              - { name: scent, label: Scent name, widget: string, required: false, hint: "e.g. Coastal Essence. Products with the same scent name are grouped under that scent on the category page." }
               - { name: mood, label: Scent mood, widget: string, required: false, hint: "e.g. Fresh · Airy" }
               - name: theme
                 label: Colour

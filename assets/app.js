@@ -17,6 +17,7 @@ const THEMES = {
 };
 
 let CONFIG = {};
+const IN_PREVIEW = new URLSearchParams(location.search).has('preview') && window.parent !== window;
 let PRODUCTS = [];
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -182,20 +183,55 @@ function initHome() {
 function initShop() {
   const params = new URLSearchParams(location.search);
   let cat = CATEGORIES[params.get('cat')] ? params.get('cat') : 'all';
-  const pills = $('#pills');
+  let scent = params.get('scent') || 'all';
+  const pills = $('#pills'), row = $('#scent-row');
+
+  // The scents that exist in a category, taken from the products' "Scent name" field.
+  const scentsIn = (c) => {
+    const map = new Map();
+    PRODUCTS.filter((p) => (c === 'all' || p.category === c) && p.scent && p.scent.trim()).forEach((p) => {
+      const id = slug(p.scent);
+      if (!map.has(id)) map.set(id, { id, name: p.scent.trim(), color: p.color, count: 0 });
+      map.get(id).count++;
+    });
+    return [...map.values()];
+  };
+  const setUrl = () => {
+    const q = new URLSearchParams();
+    if (cat !== 'all') q.set('cat', cat);
+    if (cat !== 'all' && scent !== 'all') q.set('scent', scent);
+    if (IN_PREVIEW) q.set('preview', '1');
+    history.replaceState(null, '', 'shop.html' + (q.toString() ? '?' + q : ''));
+  };
+
   const draw = () => {
     pills.innerHTML = [['all', 'All'], ...Object.entries(CATEGORIES)].map(([id, l]) => `<button class="pill" data-cat="${id}" aria-pressed="${id === cat}">${l}</button>`).join('');
-    const list = cat === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.category === cat);
+
+    const scents = cat === 'all' ? [] : scentsIn(cat);
+    if (!scents.some((x) => x.id === scent)) scent = 'all';
+    row.hidden = scents.length === 0;
+    row.innerHTML = scents.length ? `<p class="scent-label" id="scent-label">${esc(CATEGORIES[cat])} scents</p>
+      <div class="pills" role="group" aria-labelledby="scent-label">
+        <button class="pill" data-scent="all" aria-pressed="${scent === 'all'}">All scents</button>
+        ${scents.map((x) => `<button class="pill scent-pill" data-scent="${x.id}" aria-pressed="${x.id === scent}"><span class="dot" style="background:${x.color}" aria-hidden="true"></span>${esc(x.name)}</button>`).join('')}
+      </div>` : '';
+
+    let list = cat === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.category === cat);
+    if (scent !== 'all') list = list.filter((p) => p.scent && slug(p.scent) === scent);
     $('#shop-grid').innerHTML = list.length ? list.map(card).join('') : '<p class="lead">New products coming soon.</p>';
     $('#count').textContent = `${list.length} product${list.length === 1 ? '' : 's'}`;
-    $('#shop-title').textContent = cat === 'all' ? 'Shop all' : CATEGORIES[cat];
-    document.title = `${cat === 'all' ? 'Shop all' : CATEGORIES[cat]} — ${CONFIG.brand || 'Palma'}`;
+    const chosen = scents.find((x) => x.id === scent);
+    const title = cat === 'all' ? 'Shop all' : CATEGORIES[cat] + (chosen ? ' · ' + chosen.name : '');
+    $('#shop-title').textContent = title;
+    document.title = `${title} — ${CONFIG.brand || 'Palma'}`;
   };
   pills.onclick = (e) => {
     const b = e.target.closest('[data-cat]'); if (!b) return;
-    cat = b.dataset.cat;
-    history.replaceState(null, '', cat === 'all' ? 'shop.html' : `shop.html?cat=${cat}`);
-    draw();
+    cat = b.dataset.cat; scent = 'all'; setUrl(); draw();
+  };
+  row.onclick = (e) => {
+    const b = e.target.closest('[data-scent]'); if (!b) return;
+    scent = b.dataset.scent; setUrl(); draw();
   };
   draw();
 }
@@ -336,7 +372,6 @@ const renderPage = () => {
 
 /* Live preview: when this page is shown inside the admin panel, it receives the
    unsaved changes from the editor and redraws instantly. */
-const IN_PREVIEW = new URLSearchParams(location.search).has('preview') && window.parent !== window;
 if (IN_PREVIEW) {
   window.addEventListener('message', (e) => {
     const d = e.data;
