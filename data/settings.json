@@ -1,14 +1,19 @@
 {
   "brand": "palma",
   "whatsapp": "201288856351",
+  "categories": [
+    "shower",
+    "hand",
+    "bundle"
+  ],
   "currency": "EGP",
-  "deliveryFee": 0,
+  "deliveryFee": 50,
   "freeDeliveryOver": 0,
   "topBarText": "Cash on delivery · Pay when your order arrives",
   "heroEyebrow": "Shower gels · Hand washes · Bundles",
   "heroTitle": "Everyday care, made to feel like a getaway.",
   "heroText": "Body care in scents that take you somewhere — from a fresh coastal breeze to warm oriental notes.",
-  "heroImage": "",
+  "heroImage": "/images/IMG_0277.JPG.jpeg",
   "scents": [
     {
       "name": "Coastal Essence",
@@ -27,10 +32,5 @@
   "storyText": "Palma started with a simple idea: everyday body care should feel like a small escape. Every scent we make is built around a place or a mood.",
   "instagram": "",
   "tiktok": "",
-  "facebook": "",
-  "categories": [
-    "shower",
-    "hand",
-    "bundle"
-  ]
+  "facebook": ""
 }
